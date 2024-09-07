@@ -91,39 +91,62 @@ exports.updateUrl = (req, res, next) => {
   const code = req.params.code;
   const newUrl = req.body.url;
 
-  Url.findOne({ shorturl: code }).then((foundurl) => {
-    if (!foundurl) {
-      return res.status(404).json({
-        massage: "NOT FOUND",
-      });
-    }
-    Url.findOne({ url: newUrl }).then((existurl) => {
-      if (existurl) {
+  Url.findOne({ shorturl: code })
+    .then((foundurl) => {
+      if (!foundurl) {
         return res.status(404).json({
-          massage: "this Url is Already exist",
-          code: existurl.shorturl,
+          massage: "NOT FOUND",
         });
       }
-      foundurl.url = newUrl;
-      foundurl.save().then(url=>{
-        res.status(200).json({
-          massage: "successful Update",
-          url: url.url,
-          code: url.shorturl
-        })
-      }).catch((err) => {
-      console.log(err);
-      return res.status(500).json({
-        message: "Error update the URL",
-        error: err,
+      Url.findOne({ url: newUrl }).then((existurl) => {
+        if (existurl) {
+          return res.status(404).json({
+            massage: "this Url is Already exist",
+            code: existurl.shorturl,
+          });
+        }
+        foundurl.url = newUrl;
+        foundurl
+          .save()
+          .then((url) => {
+            res.status(200).json({
+              massage: "successful Update",
+              url: url.url,
+              code: url.shorturl,
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+            return res.status(500).json({
+              message: "Error update the URL",
+              error: err,
+            });
+          });
       });
-    });
-    });
-  }).catch((err) => {
+    })
+    .catch((err) => {
       console.log(err);
       return res.status(500).json({
         message: "Error get the URL",
         error: err,
+      });
+    });
+};
+exports.deleteUrl = (req, res, next) => {
+  const code = req.params.code;
+  Url.findOneAndDelete({ shorturl: code }).then((url) => {
+    if (!url) {
+      return res.status(404).json({
+        massage: "NOT FOUND",
+      });
+    }
+    return res.status(200).json({
+        massage : "successful Deleting Url"
+    })
+  }).catch((err) => {
+      console.log(err);
+      return res.status(500).json({
+        message: "Error delete the URL",
       });
     });
 };
