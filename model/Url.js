@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 const { type } = require("os")
-const shortid = requier("shortid")
+const shortid = require("shortid")
 const Schema = mongoose.Schema
 
 const Url = new Schema(

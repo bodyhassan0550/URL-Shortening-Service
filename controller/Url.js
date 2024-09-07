@@ -1,9 +1,8 @@
 const Url = require("../model/Url");
 
-exports.postAddUrl((req, res, next) => {
-  const url = req.body.url;
-
-  Url.findOne({ url: url })
+exports.postAddUrl = (req, res, next) => {
+  const inputurl = req.body.url;
+  Url.findOne({ url: inputurl })
     .then((existurl) => {
       if (existurl) {
         return res.status(404).json({
@@ -11,7 +10,7 @@ exports.postAddUrl((req, res, next) => {
         });
       }
       const url = new Url({
-        url: url,
+        url: inputurl,
       });
       url
         .save()
@@ -36,4 +35,29 @@ exports.postAddUrl((req, res, next) => {
         error: err,
       });
     });
-});
+};
+
+exports.geturl = (req, res, next) => {
+  const code = req.params.code;
+  Url.findOneAndUpdate(
+    { shorturl: code },
+    { $inc: { count: 1 } }, // Increment the count field by 1
+    { new: true }
+  ).then((existurl) => {
+    if (!existurl) {
+      return res.status(404).json({
+        massage: "NOT FOUND",
+      });
+    }
+    return res.status(200).json({
+      url: existurl.url,
+      Short : existurl.shorturl
+    });
+  }).catch((err) => {
+      console.log(err);
+      return res.status(500).json({
+        message: "Error get the URL",
+        error: err,
+      });
+    });
+};
